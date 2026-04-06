@@ -270,6 +270,30 @@ function doDelTag(t){
   save();render();
 }
 
+function doExport(){
+  const json=JSON.stringify(data,null,2);
+  const blob=new Blob([json],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  a.download="xiaomian-garden-backup-"+td()+".json";
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast("数据已导出 📦");
+}
+function doImport(file){
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const imported=JSON.parse(e.target.result);
+      if(imported&&imported.plants&&Array.isArray(imported.plants)){
+        data=imported;save();toast("数据已导入 ✨");render();
+      }else{toast("文件格式不对哦");}
+    }catch(err){toast("导入失败，文件有问题");}
+  };
+  reader.readAsText(file);
+}
+
 function nav(v,id){view=v;if(id!==undefined)selId=id;showDiaryForm=false;diaryText="";diaryPhotos=[];showEdit=false;render();}
 function toast(m){if(toastTimer)clearTimeout(toastTimer);const el=document.getElementById("toast");if(el){el.textContent=m;el.className="toast";}toastTimer=setTimeout(()=>{if(el)el.className="toast out";},2000);}
 
@@ -346,8 +370,11 @@ function rHome(){
   <div class="flex flex-center gap-8 pb-30 wrap">
     <button class="btn btn-p" data-a="go-add">+ 添加植物</button>
     <button class="btn btn-s btn-sm" data-a="go-tags">管理标签</button>
+    <button class="btn btn-s btn-sm" data-a="export-data">📦 导出</button>
+    <button class="btn btn-s btn-sm" data-a="import-data">📥 导入</button>
     <button class="btn btn-s btn-sm" data-a="show-reset">重置</button>
-  </div>`;
+  </div>
+  <input type="file" id="importInput" accept=".json" style="display:none">`;
 }
 
 function rDetail(){
@@ -496,6 +523,8 @@ function bindAll(){
     else if(a==="add-tag")el.onclick=()=>doAddTag();
     else if(a==="del-tag")el.onclick=()=>doDelTag(el.dataset.tag);
     else if(a==="show-reset")el.onclick=()=>{showModal="reset";render();};
+    else if(a==="export-data")el.onclick=()=>doExport();
+    else if(a==="import-data")el.onclick=()=>document.getElementById("importInput").click();
     else if(a==="close-modal")el.onclick=()=>{showModal=null;render();};
     else if(a==="do-reset")el.onclick=()=>doReset();
   });
@@ -503,6 +532,8 @@ function bindAll(){
   if(wi)wi.onchange=()=>{const p=sel();if(p){p.waterDays=Math.max(1,+wi.value);save();render();}};
   if(fi)fi.onchange=()=>{const p=sel();if(p){p.fertDays=Math.max(1,+fi.value);save();render();}};
   document.getElementById("photoInput").onchange=e=>{if(e.target.files.length)handlePhotos(e.target.files);e.target.value="";};
+  const ii=document.getElementById("importInput");
+  if(ii)ii.onchange=e=>{if(e.target.files.length)doImport(e.target.files[0]);e.target.value="";};
 }
 
 // ========== INIT ==========
