@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="小眠的花园">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#eef4e8">
+<title>小眠的花园</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#8cc084;--gd:#4a6741;--gl:#a8d5a0;--w:#7ec8e3;--f:#d4a76a;--red:#e88;--warn:#edb95e;
+  --serif:'Georgia','Hiragino Mincho ProN','Yu Mincho',serif;
+  --sans:-apple-system,'Helvetica Neue','Hiragino Sans','Yu Gothic',sans-serif;
+  --st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);
+}
+body{font-family:var(--sans);background:linear-gradient(170deg,#f6f9f2 0%,#eef4e8 40%,#fdf8f0 100%);min-height:100dvh;-webkit-tap-highlight-color:transparent;padding-top:var(--st);padding-bottom:var(--sb)}
+#app{max-width:500px;margin:0 auto;padding:0 16px;position:relative;z-index:1}
+.leaves{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+.leaves span{position:absolute}
+
+/* Card */
+.card{background:rgba(255,255,255,0.85);border-radius:16px;padding:16px 18px;margin-bottom:12px;box-shadow:0 2px 12px rgba(120,160,100,0.08);border:1px solid rgba(160,190,140,0.2);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.card-alert{background:linear-gradient(135deg,rgba(255,248,235,0.9),rgba(255,243,220,0.9));border:1px solid rgba(220,190,130,0.3)}
+.card-click{cursor:pointer;transition:transform .15s}.card-click:active{transform:scale(.98)}
+
+/* Btn */
+.btn{border:none;border-radius:20px;padding:8px 18px;font-size:13px;font-family:var(--sans);cursor:pointer;transition:all .2s;font-weight:500;display:inline-flex;align-items:center;justify-content:center;gap:4px}
+.btn:active{transform:scale(.97)}
+.btn-p{background:linear-gradient(135deg,var(--g),var(--gl));color:#fff;box-shadow:0 2px 8px rgba(140,192,132,.3)}
+.btn-s{background:#f0f5ed;color:#5a7a52}
+.btn-d{background:#fce8e8;color:#c55}
+.btn-w{background:linear-gradient(135deg,#7ec8e3,#a6dcef);color:#fff;box-shadow:0 2px 8px rgba(126,200,227,.3)}
+.btn-f{background:linear-gradient(135deg,#d4a76a,#e8c98e);color:#fff;box-shadow:0 2px 8px rgba(212,167,106,.3)}
+.btn-ghost{background:none;color:#8aaa82;padding:4px 0}
+.btn-sm{font-size:12px;padding:6px 14px}
+.btn-xs{font-size:11px;padding:4px 10px}
+.btn-block{width:100%}
+.btn-icon{font-size:22px;padding:6px 8px;line-height:1;background:transparent;border:2px solid transparent;border-radius:10px}
+.btn-icon.active{background:#e8f0e4;border-color:var(--g)}
+
+/* Tag */
+.tag{display:inline-flex;align-items:center;padding:4px 12px;border-radius:14px;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;border:1.5px solid transparent}
+.tag-default{background:#f0f5ed;color:#5a7a52;border-color:#dde8d8}
+.tag-active{background:var(--g);color:#fff;border-color:var(--g)}
+.tag-sm{padding:3px 8px;font-size:11px;border-radius:10px}
+
+/* Dot */
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;flex-shrink:0}
+.dot-ok{background:var(--g)}.dot-warn{background:var(--warn)}.dot-alert{background:var(--red)}.dot-none{background:#ccc}
+
+/* Input */
+.inp,.ta{border:1.5px solid #d5e0cf;border-radius:10px;padding:10px 14px;font-size:14px;font-family:var(--sans);background:#fafcf8;outline:none;width:100%;transition:border-color .2s,box-shadow .2s}
+.inp:focus,.ta:focus{border-color:var(--g);box-shadow:0 0 0 3px rgba(140,192,132,.15)}
+.ta{resize:none;min-height:80px;font-size:13px;line-height:1.6}
+
+/* Layout */
+.flex{display:flex}.flex-c{flex-direction:column}.flex-center{align-items:center;justify-content:center}
+.gap-4{gap:4px}.gap-6{gap:6px}.gap-8{gap:8px}.gap-10{gap:10px}.gap-12{gap:12px}.gap-14{gap:14px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tc{text-align:center}.tr{text-align:right}.wrap{flex-wrap:wrap}.f1{flex:1;min-width:0}
+.mb-4{margin-bottom:4px}.mb-6{margin-bottom:6px}.mb-8{margin-bottom:8px}.mb-10{margin-bottom:10px}
+.mb-12{margin-bottom:12px}.mb-14{margin-bottom:14px}.mb-16{margin-bottom:16px}.mb-20{margin-bottom:20px}
+.mt-2{margin-top:2px}.mt-4{margin-top:4px}.mt-6{margin-top:6px}.mt-8{margin-top:8px}.mt-12{margin-top:12px}
+.pb-30{padding-bottom:30px}
+
+/* Typo */
+.title{font-family:var(--serif);font-size:22px;color:var(--gd);font-weight:600;letter-spacing:1px}
+.subtitle{font-size:12px;color:#9ab392;letter-spacing:.5px}
+.pname{font-family:var(--serif);font-size:15px;color:#3a5a32;font-weight:600}
+.ptype{font-size:11px;color:#aaa}
+.sec{font-size:13px;color:#5a7a52;font-weight:600}
+.label{font-size:12px;color:#888;display:block;margin-bottom:4px}
+.label-sm{font-size:11px;color:#999}
+.muted{color:#bbb;font-size:12px}
+.xs{font-size:10px;color:#bbb}
+.info{font-size:11px;color:#888}
+
+/* Toast */
+.toast{position:fixed;bottom:calc(40px + var(--sb));left:50%;transform:translateX(-50%);background:rgba(74,103,65,.92);color:#fff;padding:10px 24px;border-radius:20px;font-size:13px;box-shadow:0 4px 16px rgba(0,0,0,.15);z-index:100;animation:fadeIn .3s ease;pointer-events:none}
+.toast.out{animation:fadeOut .3s ease forwards}.toast.hidden{display:none}
+
+/* Modal */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;z-index:50}
+.modal-c{max-width:320px;margin:16px}
+
+/* Diary */
+.diary-entry{padding:14px 0;border-bottom:1px solid #eef2ea}
+.diary-entry:last-child{border-bottom:none}
+.diary-photos{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.diary-photo{width:72px;height:72px;border-radius:10px;object-fit:cover;cursor:pointer;border:1px solid #e8ede4}
+.diary-photo-lg{max-width:100%;max-height:60vh;border-radius:12px;object-fit:contain}
+
+/* Photo upload */
+.photo-upload{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.photo-preview{width:64px;height:64px;border-radius:8px;object-fit:cover;position:relative;border:1px solid #dde8d8}
+.photo-add{width:64px;height:64px;border-radius:8px;border:2px dashed #c5d8be;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#8aaa82;font-size:24px;transition:border-color .2s}
+.photo-add:hover{border-color:var(--g)}
+.photo-remove{position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:#e88;color:#fff;border:none;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
+
+/* Status */
+.stat-card{text-align:center;margin-bottom:0}
+.stat-icon{font-size:22px;margin-bottom:4px}
+.stat-val{font-size:14px;font-weight:600;margin-top:2px}
+
+/* Filter bar */
+.filter-bar{display:flex;gap:6px;overflow-x:auto;padding:4px 0 8px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.filter-bar::-webkit-scrollbar{display:none}
+
+/* Photo lightbox */
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:60;cursor:pointer;padding:20px}
+
+@keyframes fadeIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes fadeOut{from{opacity:1;transform:translateX(-50%) translateY(0)}to{opacity:0;transform:translateX(-50%) translateY(10px)}}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.15);opacity:.7}}
+</style>
+</head>
+<body>
+<div class="leaves">
+  <span style="font-size:18px;opacity:.07;top:10%;left:5%;transform:rotate(-40deg)">🍃</span>
+  <span style="font-size:22px;opacity:.085;top:28%;left:25%;transform:rotate(-5deg)">🌿</span>
+  <span style="font-size:26px;opacity:.1;top:46%;left:45%;transform:rotate(30deg)">🍂</span>
+  <span style="font-size:30px;opacity:.115;top:64%;left:65%;transform:rotate(65deg)">🍃</span>
+  <span style="font-size:34px;opacity:.13;top:82%;left:85%;transform:rotate(100deg)">🌿</span>
+</div>
+<div id="app"></div>
+<canvas id="ic" width="512" height="512" style="display:none"></canvas>
+<input type="file" id="photoInput" accept="image/*" multiple style="display:none">
+
+<script>
+// ========== ICON & PWA ==========
+function genIcon(sz){
+  const c=document.getElementById("ic");c.width=sz;c.height=sz;const x=c.getContext("2d"),s=sz/512;
+  const r=112*s;x.beginPath();x.moveTo(r,0);x.lineTo(sz-r,0);x.quadraticCurveTo(sz,0,sz,r);x.lineTo(sz,sz-r);x.quadraticCurveTo(sz,sz,sz-r,sz);x.lineTo(r,sz);x.quadraticCurveTo(0,sz,0,sz-r);x.lineTo(0,r);x.quadraticCurveTo(0,0,r,0);x.closePath();
+  const bg=x.createLinearGradient(0,0,sz,sz);bg.addColorStop(0,"#e8f5e2");bg.addColorStop(.5,"#d4edda");bg.addColorStop(1,"#f0e6f0");x.fillStyle=bg;x.fill();
+  x.beginPath();x.moveTo(256*s,370*s);x.lineTo(256*s,220*s);x.strokeStyle="#7aaa72";x.lineWidth=8*s;x.lineCap="round";x.stroke();
+  const lg=x.createLinearGradient(200*s,120*s,310*s,310*s);lg.addColorStop(0,"#7ec9a0");lg.addColorStop(1,"#e0a8c0");
+  x.beginPath();x.moveTo(256*s,120*s);x.quadraticCurveTo(320*s,190*s,315*s,240*s);x.quadraticCurveTo(310*s,295*s,256*s,315*s);x.quadraticCurveTo(202*s,295*s,197*s,240*s);x.quadraticCurveTo(192*s,190*s,256*s,120*s);x.fillStyle=lg;x.globalAlpha=.9;x.fill();x.globalAlpha=1;
+  x.strokeStyle="rgba(255,255,255,.4)";x.lineWidth=3*s;x.beginPath();x.moveTo(256*s,145*s);x.lineTo(256*s,300*s);x.stroke();
+  x.strokeStyle="rgba(255,255,255,.3)";x.lineWidth=2*s;
+  [[256,200,228,178],[256,230,284,208],[256,258,230,240]].forEach(([a,b,c,d])=>{x.beginPath();x.moveTo(a*s,b*s);x.lineTo(c*s,d*s);x.stroke();});
+  x.globalAlpha=.7;
+  const ll=x.createLinearGradient(175*s,250*s,230*s,310*s);ll.addColorStop(0,"#a8d8b8");ll.addColorStop(1,"#d4a0be");x.fillStyle=ll;
+  x.beginPath();x.moveTo(228*s,312*s);x.quadraticCurveTo(188*s,280*s,172*s,248*s);x.quadraticCurveTo(185*s,288*s,210*s,308*s);x.closePath();x.fill();
+  const rl=x.createLinearGradient(282*s,250*s,340*s,310*s);rl.addColorStop(0,"#6dbe8a");rl.addColorStop(1,"#c9e6d4");x.fillStyle=rl;
+  x.beginPath();x.moveTo(284*s,312*s);x.quadraticCurveTo(324*s,280*s,340*s,248*s);x.quadraticCurveTo(327*s,288*s,302*s,308*s);x.closePath();x.fill();
+  x.globalAlpha=1;
+  x.fillStyle="rgba(255,255,255,.5)";x.beginPath();x.arc(223*s,195*s,6*s,0,Math.PI*2);x.fill();
+  x.fillStyle="rgba(255,255,255,.8)";x.beginPath();x.arc(225*s,193*s,2.5*s,0,Math.PI*2);x.fill();
+  x.fillStyle="rgba(90,122,82,.8)";x.font=`600 ${36*s}px Georgia,'Hiragino Mincho ProN',serif`;x.textAlign="center";x.textBaseline="middle";x.fillText("小眠的花园",256*s,410*s);
+  return c.toDataURL("image/png");
+}
+function setupPWA(){
+  const i192=genIcon(192),i512=genIcon(512);
+  const fav=document.createElement("link");fav.rel="icon";fav.type="image/png";fav.href=genIcon(32);document.head.appendChild(fav);
+  const ai=document.createElement("link");ai.rel="apple-touch-icon";ai.href=i192;document.head.appendChild(ai);
+  const m={name:"小眠的花园",short_name:"花园",description:"阳台花园植物养护管理",start_url:".",display:"standalone",background_color:"#eef4e8",theme_color:"#eef4e8",orientation:"portrait",icons:[{src:i192,sizes:"192x192",type:"image/png"},{src:i512,sizes:"512x512",type:"image/png",purpose:"any maskable"}]};
+  const ml=document.createElement("link");ml.rel="manifest";ml.href=URL.createObjectURL(new Blob([JSON.stringify(m)],{type:"application/json"}));document.head.appendChild(ml);
+  if("serviceWorker"in navigator){const sw=`const C="garden-v2";self.addEventListener("install",e=>{self.skipWaiting()});self.addEventListener("activate",e=>{e.waitUntil(clients.claim())});self.addEventListener("fetch",e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(resp=>{if(resp.status===200){const c=resp.clone();caches.open(C).then(cache=>cache.put(e.request,c))}return resp}).catch(()=>caches.match(e.request)))});`;navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:"application/javascript"}))).catch(()=>{});}
+}
+
+// ========== DATA ==========
+const SK="xiaomian-garden-v2";
+// Custom SVG icons
+const SVG_ICONS = {
+  // Roses - classic 🌹 style with layered spiral petals
+  "rose-pink": `<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path d="M24 6c-2.5 0-5.5 1.5-7.5 4-2.5 3-3 6.5-2 9.5 1 3 3.5 5.5 6 7 1.5 1 2.5 1.2 3.5 1.2s2-.2 3.5-1.2c2.5-1.5 5-4 6-7 1-3 .5-6.5-2-9.5-2-2.5-5-4-7.5-4z" fill="#f2a0b5"/><path d="M24 8.5c-2 0-4.5 1.2-6 3.2-2 2.5-2.2 5-1.5 7.5.8 2.5 2.8 4.5 5 5.8 1.2.7 2 .8 2.5.8s1.3-.1 2.5-.8c2.2-1.3 4.2-3.3 5-5.8.7-2.5.5-5-1.5-7.5-1.5-2-4-3.2-6-3.2z" fill="#e8809a"/><path d="M24 11c-1.5 0-3.5 1-4.5 2.5-1.5 2-1.5 4-.8 5.8.6 1.8 2 3.2 3.5 4 .8.5 1.3.5 1.8.5s1-.1 1.8-.5c1.5-.8 2.9-2.2 3.5-4 .7-1.8.7-3.8-.8-5.8-1-1.5-3-2.5-4.5-2.5z" fill="#d8607a"/><path d="M24 14c-.8 0-2 .6-2.6 1.5-.8 1.2-.6 2.5 0 3.5.4.8 1.2 1.5 2 1.8.3.2.5.2.6.2s.3 0 .6-.2c.8-.3 1.6-1 2-1.8.6-1 .8-2.3 0-3.5-.6-.9-1.8-1.5-2.6-1.5z" fill="#c84060"/><ellipse cx="24" cy="15.5" rx="1.2" ry="1.8" fill="#b83050" transform="rotate(-10 24 15.5)"/><path d="M24 28v16" stroke="#3a7a2a" stroke-width="2.5" stroke-linecap="round"/><path d="M27 34c1-.8 1.2-1.8.8-2.5" stroke="#3a7a2a" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M24 36c-4-1-6.5-.5-8 1" stroke="#3a7a2a" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M16.5 36c-.8-2 0-4.5 2-5.5" stroke="#3a7a2a" stroke-width="1.2" fill="none"/><ellipse cx="15.5" cy="35.5" rx="3.2" ry="2" fill="#4a9a3a" transform="rotate(-25 15.5 35.5)"/><path d="M15.5 35.5l2.5-2" stroke="rgba(255,255,255,.3)" stroke-width=".6" fill="none"/></svg>`,
+  "rose-red": `<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path d="M24 6c-2.5 0-5.5 1.5-7.5 4-2.5 3-3 6.5-2 9.5 1 3 3.5 5.5 6 7 1.5 1 2.5 1.2 3.5 1.2s2-.2 3.5-1.2c2.5-1.5 5-4 6-7 1-3 .5-6.5-2-9.5-2-2.5-5-4-7.5-4z" fill="#e03030"/><path d="M24 8.5c-2 0-4.5 1.2-6 3.2-2 2.5-2.2 5-1.5 7.5.8 2.5 2.8 4.5 5 5.8 1.2.7 2 .8 2.5.8s1.3-.1 2.5-.8c2.2-1.3 4.2-3.3 5-5.8.7-2.5.5-5-1.5-7.5-1.5-2-4-3.2-6-3.2z" fill="#c82020"/><path d="M24 11c-1.5 0-3.5 1-4.5 2.5-1.5 2-1.5 4-.8 5.8.6 1.8 2 3.2 3.5 4 .8.5 1.3.5 1.8.5s1-.1 1.8-.5c1.5-.8 2.9-2.2 3.5-4 .7-1.8.7-3.8-.8-5.8-1-1.5-3-2.5-4.5-2.5z" fill="#a81818"/><path d="M24 14c-.8 0-2 .6-2.6 1.5-.8 1.2-.6 2.5 0 3.5.4.8 1.2 1.5 2 1.8.3.2.5.2.6.2s.3 0 .6-.2c.8-.3 1.6-1 2-1.8.6-1 .8-2.3 0-3.5-.6-.9-1.8-1.5-2.6-1.5z" fill="#901010"/><ellipse cx="24" cy="15.5" rx="1.2" ry="1.8" fill="#780808" transform="rotate(-10 24 15.5)"/><path d="M24 28v16" stroke="#3a7a2a" stroke-width="2.5" stroke-linecap="round"/><path d="M27 34c1-.8 1.2-1.8.8-2.5" stroke="#3a7a2a" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M24 36c-4-1-6.5-.5-8 1" stroke="#3a7a2a" stroke-width="1.5" fill="none" stroke-linecap="round"/><ellipse cx="15.5" cy="35.5" rx="3.2" ry="2" fill="#4a9a3a" transform="rotate(-25 15.5 35.5)"/><path d="M15.5 35.5l2.5-2" stroke="rgba(255,255,255,.3)" stroke-width=".6" fill="none"/></svg>`,
+  "rose-yellow": `<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path d="M24 6c-2.5 0-5.5 1.5-7.5 4-2.5 3-3 6.5-2 9.5 1 3 3.5 5.5 6 7 1.5 1 2.5 1.2 3.5 1.2s2-.2 3.5-1.2c2.5-1.5 5-4 6-7 1-3 .5-6.5-2-9.5-2-2.5-5-4-7.5-4z" fill="#f5d56a"/><path d="M24 8.5c-2 0-4.5 1.2-6 3.2-2 2.5-2.2 5-1.5 7.5.8 2.5 2.8 4.5 5 5.8 1.2.7 2 .8 2.5.8s1.3-.1 2.5-.8c2.2-1.3 4.2-3.3 5-5.8.7-2.5.5-5-1.5-7.5-1.5-2-4-3.2-6-3.2z" fill="#e8c040"/><path d="M24 11c-1.5 0-3.5 1-4.5 2.5-1.5 2-1.5 4-.8 5.8.6 1.8 2 3.2 3.5 4 .8.5 1.3.5 1.8.5s1-.1 1.8-.5c1.5-.8 2.9-2.2 3.5-4 .7-1.8.7-3.8-.8-5.8-1-1.5-3-2.5-4.5-2.5z" fill="#d8a820"/><path d="M24 14c-.8 0-2 .6-2.6 1.5-.8 1.2-.6 2.5 0 3.5.4.8 1.2 1.5 2 1.8.3.2.5.2.6.2s.3 0 .6-.2c.8-.3 1.6-1 2-1.8.6-1 .8-2.3 0-3.5-.6-.9-1.8-1.5-2.6-1.5z" fill="#c89818"/><ellipse cx="24" cy="15.5" rx="1.2" ry="1.8" fill="#b88810" transform="rotate(-10 24 15.5)"/><path d="M24 28v16" stroke="#3a7a2a" stroke-width="2.5" stroke-linecap="round"/><path d="M27 34c1-.8 1.2-1.8.8-2.5" stroke="#3a7a2a" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M24 36c-4-1-6.5-.5-8 1" stroke="#3a7a2a" stroke-width="1.5" fill="none" stroke-linecap="round"/><ellipse cx="15.5" cy="35.5" rx="3.2" ry="2" fill="#4a9a3a" transform="rotate(-25 15.5 35.5)"/><path d="M15.5 35.5l2.5-2" stroke="rgba(255,255,255,.3)" stroke-width=".6" fill="none"/></svg>`,
+  "rose-purple": `<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path d="M24 6c-2.5 0-5.5 1.5-7.5 4-2.5 3-3 6.5-2 9.5 1 3 3.5 5.5 6 7 1.5 1 2.5 1.2 3.5 1.2s2-.2 3.5-1.2c2.5-1.5 5-4 6-7 1-3 .5-6.5-2-9.5-2-2.5-5-4-7.5-4z" fill="#c8a0d8"/><path d="M24 8.5c-2 0-4.5 1.2-6 3.2-2 2.5-2.2 5-1.5 7.5.8 2.5 2.8 4.5 5 5.8 1.2.7 2 .8 2.5.8s1.3-.1 2.5-.8c2.2-1.3 4.2-3.3 5-5.8.7-2.5.5-5-1.5-7.5-1.5-2-4-3.2-6-3.2z" fill="#a880c0"/><path d="M24 11c-1.5 0-3.5 1-4.5 2.5-1.5 2-1.5 4-.8 5.8.6 1.8 2 3.2 3.5 4 .8.5 1.3.5 1.8.5s1-.1 1.8-.5c1.5-.8 2.9-2.2 3.5-4 .7-1.8.7-3.8-.8-5.8-1-1.5-3-2.5-4.5-2.5z" fill="#8860a8"/><path d="M24 14c-.8 0-2 .6-2.6 1.5-.8 1.2-.6 2.5 0 3.5.4.8 1.2 1.5 2 1.8.3.2.5.2.6.2s.3 0 .6-.2c.8-.3 1.6-1 2-1.8.6-1 .8-2.3 0-3.5-.6-.9-1.8-1.5-2.6-1.5z" fill="#704898"/><ellipse cx="24" cy="15.5" rx="1.2" ry="1.8" fill="#603888" transform="rotate(-10 24 15.5)"/><path d="M24 28v16" stroke="#3a7a2a" stroke-width="2.5" stroke-linecap="round"/><path d="M27 34c1-.8 1.2-1.8.8-2.5" stroke="#3a7a2a" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M24 36c-4-1-6.5-.5-8 1" stroke="#3a7a2a" stroke-width="1.5" fill="none" stroke-linecap="round"/><ellipse cx="15.5" cy="35.5" rx="3.2" ry="2" fill="#4a9a3a" transform="rotate(-25 15.5 35.5)"/><path d="M15.5 35.5l2.5-2" stroke="rgba(255,255,255,.3)" stroke-width=".6" fill="none"/></svg>`,
+  "rose-white": `<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path d="M24 6c-2.5 0-5.5 1.5-7.5 4-2.5 3-3 6.5-2 9.5 1 3 3.5 5.5 6 7 1.5 1 2.5 1.2 3.5 1.2s2-.2 3.5-1.2c2.5-1.5 5-4 6-7 1-3 .5-6.5-2-9.5-2-2.5-5-4-7.5-4z" fill="#f2eee8"/><path d="M24 8.5c-2 0-4.5 1.2-6 3.2-2 2.5-2.2 5-1.5 7.5.8 2.5 2.8 4.5 5 5.8 1.2.7 2 .8 2.5.8s1.3-.1 2.5-.8c2.2-1.3 4.2-3.3 5-5.8.7-2.5.5-5-1.5-7.5-1.5-2-4-3.2-6-3.2z" fill="#e8e2d8"/><path d="M24 11c-1.5 0-3.5 1-4.5 2.5-1.5 2-1.5 4-.8 5.8.6 1.8 2 3.2 3.5 4 .8.5 1.3.5 1.8.5s1-.1 1.8-.5c1.5-.8 2.9-2.2 3.5-4 .7-1.8.7-3.8-.8-5.8-1-1.5-3-2.5-4.5-2.5z" fill="#ddd6c8"/><path d="M24 14c-.8 0-2 .6-2.6 1.5-.8 1.2-.6 2.5 0 3.5.4.8 1.2 1.5 2 1.8.3.2.5.2.6.2s.3 0 .6-.2c.8-.3 1.6-1 2-1.8.6-1 .8-2.3 0-3.5-.6-.9-1.8-1.5-2.6-1.5z" fill="#d0c8b8"/><ellipse cx="24" cy="15.5" rx="1.2" ry="1.8" fill="#c4bcac" transform="rotate(-10 24 15.5)"/><path d="M24 28v16" stroke="#3a7a2a" stroke-width="2.5" stroke-linecap="round"/><path d="M27 34c1-.8 1.2-1.8.8-2.5" stroke="#3a7a2a" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M24 36c-4-1-6.5-.5-8 1" stroke="#3a7a2a" stroke-width="1.5" fill="none" stroke-linecap="round"/><ellipse cx="15.5" cy="35.5" rx="3.2" ry="2" fill="#4a9a3a" transform="rotate(-25 15.5 35.5)"/><path d="M15.5 35.5l2.5-2" stroke="rgba(255,255,255,.3)" stroke-width=".6" fill="none"/></svg>`,
+  // Berries
+  "blueberry": `<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="28" r="7" fill="#4a6aaa"/><circle cx="20" cy="28" r="7" fill="url(#bb1)"/><circle cx="30" cy="24" r="6.5" fill="#5070b0"/><circle cx="25" cy="32" r="6" fill="#3a5a98"/><circle cx="18" cy="26" r="1.5" fill="rgba(255,255,255,.25)"/><circle cx="28" cy="22.5" r="1.2" fill="rgba(255,255,255,.2)"/><circle cx="23.5" cy="30.5" r="1" fill="rgba(255,255,255,.2)"/><path d="M22 17c1-2 3-3 3-3" stroke="#5a8a4a" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M27 16c0-2 1-3.5 1-3.5" stroke="#5a8a4a" stroke-width="1.5" fill="none" stroke-linecap="round"/><ellipse cx="22" cy="17" rx="3" ry="1.5" fill="#6aaa5a"/><defs><radialGradient id="bb1"><stop offset="0%" stop-color="rgba(255,255,255,.1)"/><stop offset="100%" stop-color="rgba(0,0,0,.15)"/></radialGradient></defs></svg>`,
+  "strawberry": `<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path d="M24 14c-5 0-10 4-11 10-1 6 2 12 5.5 15 2 1.8 3.8 3 5.5 3s3.5-1.2 5.5-3c3.5-3 6.5-9 5.5-15-1-6-6-10-11-10z" fill="#e04040"/><path d="M24 14c-5 0-10 4-11 10-1 6 2 12 5.5 15 2 1.8 3.8 3 5.5 3s3.5-1.2 5.5-3c3.5-3 6.5-9 5.5-15-1-6-6-10-11-10z" fill="url(#sb1)"/><circle cx="20" cy="22" r=".8" fill="#f0d060"/><circle cx="27" cy="24" r=".8" fill="#f0d060"/><circle cx="22" cy="28" r=".8" fill="#f0d060"/><circle cx="26" cy="30" r=".8" fill="#f0d060"/><circle cx="24" cy="35" r=".8" fill="#f0d060"/><circle cx="20" cy="33" r=".8" fill="#f0d060"/><circle cx="28" cy="20" r=".8" fill="#f0d060"/><path d="M19 13c2-2 5-3 5-3s3 1 5 3" stroke="#4a8a3a" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M18 14.5c1-3 6-5 6-5s5 2 6 5" fill="#5aaa4a"/><path d="M24 9v5" stroke="#4a8a3a" stroke-width="1.5" stroke-linecap="round"/><defs><radialGradient id="sb1" cx="35%" cy="30%"><stop offset="0%" stop-color="rgba(255,255,255,.15)"/><stop offset="100%" stop-color="rgba(0,0,0,.1)"/></radialGradient></defs></svg>`,
+  // Pansies
+  "pansy-blue": `<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><ellipse cx="18" cy="16" rx="7" ry="8" fill="#6080cc" transform="rotate(-15 18 16)"/><ellipse cx="30" cy="16" rx="7" ry="8" fill="#5070b8" transform="rotate(15 30 16)"/><ellipse cx="16" cy="26" rx="7" ry="6.5" fill="#7090d0" transform="rotate(20 16 26)"/><ellipse cx="32" cy="26" rx="7" ry="6.5" fill="#7090d0" transform="rotate(-20 32 26)"/><ellipse cx="24" cy="32" rx="8" ry="7" fill="#8aa0e0"/><circle cx="24" cy="22" r="4" fill="#f5e060"/><circle cx="24" cy="22" r="2" fill="#d08020"/><path d="M24 20v-2c0 0-1.5-1-3-1" stroke="#3a5a30" stroke-width="1" fill="none"/><path d="M24 20v-2c0 0 1.5-1 3-1" stroke="#3a5a30" stroke-width="1" fill="none"/><path d="M22 23c-2 1-4 4-3 5" stroke="#4050a0" stroke-width=".8" fill="none"/><path d="M26 23c2 1 4 4 3 5" stroke="#4050a0" stroke-width=".8" fill="none"/><path d="M23.5 36v8" stroke="#5a8a4a" stroke-width="2" stroke-linecap="round"/></svg>`,
+  "pansy-white": `<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><ellipse cx="18" cy="16" rx="7" ry="8" fill="#f0ece4" transform="rotate(-15 18 16)"/><ellipse cx="30" cy="16" rx="7" ry="8" fill="#e8e4dc" transform="rotate(15 30 16)"/><ellipse cx="16" cy="26" rx="7" ry="6.5" fill="#f4f0e8" transform="rotate(20 16 26)"/><ellipse cx="32" cy="26" rx="7" ry="6.5" fill="#f4f0e8" transform="rotate(-20 32 26)"/><ellipse cx="24" cy="32" rx="8" ry="7" fill="#f8f4f0"/><circle cx="24" cy="22" r="4" fill="#f5e060"/><circle cx="24" cy="22" r="2" fill="#d08020"/><path d="M22 23c-2 1-3 3-2 4" stroke="#c0b8a0" stroke-width=".8" fill="none"/><path d="M26 23c2 1 3 3 2 4" stroke="#c0b8a0" stroke-width=".8" fill="none"/><path d="M23.5 36v8" stroke="#5a8a4a" stroke-width="2" stroke-linecap="round"/></svg>`,
+  "pansy-purple": `<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><ellipse cx="18" cy="16" rx="7" ry="8" fill="#9060b0" transform="rotate(-15 18 16)"/><ellipse cx="30" cy="16" rx="7" ry="8" fill="#8050a0" transform="rotate(15 30 16)"/><ellipse cx="16" cy="26" rx="7" ry="6.5" fill="#a070c0" transform="rotate(20 16 26)"/><ellipse cx="32" cy="26" rx="7" ry="6.5" fill="#a070c0" transform="rotate(-20 32 26)"/><ellipse cx="24" cy="32" rx="8" ry="7" fill="#b888d0"/><circle cx="24" cy="22" r="4" fill="#f5e060"/><circle cx="24" cy="22" r="2" fill="#d08020"/><path d="M22 23c-2 1-3 3-2 4" stroke="#6040a0" stroke-width=".8" fill="none"/><path d="M26 23c2 1 3 3 2 4" stroke="#6040a0" stroke-width=".8" fill="none"/><path d="M21 28c-1.5 2-1 4 0 5" stroke="#6040a0" stroke-width=".6" fill="none"/><path d="M27 28c1.5 2 1 4 0 5" stroke="#6040a0" stroke-width=".6" fill="none"/><path d="M23.5 36v8" stroke="#5a8a4a" stroke-width="2" stroke-linecap="round"/></svg>`,
+  // Utility
+  "leaf": `<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path d="M12 36C12 18 24 8 38 8c0 14-10 26-26 28z" fill="#6aaa5a"/><path d="M12 36C18 30 26 20 38 8" stroke="rgba(255,255,255,.4)" stroke-width="1.5" fill="none"/><path d="M20 28c3-4 7-7 11-9" stroke="rgba(255,255,255,.25)" stroke-width="1" fill="none"/><path d="M16 32c2-3 5-6 8-8" stroke="rgba(255,255,255,.25)" stroke-width="1" fill="none"/></svg>`,
+  "sprout": `<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path d="M24 42v-18" stroke="#5a8a4a" stroke-width="2.5" stroke-linecap="round"/><path d="M24 28c-8-2-10-10-8-16 6 0 12 6 8 16z" fill="#7cc06a"/><path d="M24 24c6-4 12-2 14 4-4 4-12 2-14-4z" fill="#6aaa5a"/><path d="M24 28c-2-4-4-8-4-12" stroke="rgba(255,255,255,.3)" stroke-width="1" fill="none"/></svg>`,
+  "flower-pink": `<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><ellipse cx="24" cy="14" rx="5" ry="7" fill="#f0a0b0"/><ellipse cx="15" cy="22" rx="5" ry="7" fill="#e890a0" transform="rotate(-60 15 22)"/><ellipse cx="33" cy="22" rx="5" ry="7" fill="#e890a0" transform="rotate(60 33 22)"/><ellipse cx="18" cy="31" rx="5" ry="7" fill="#f0a0b0" transform="rotate(-30 18 31)"/><ellipse cx="30" cy="31" rx="5" ry="7" fill="#f0a0b0" transform="rotate(30 30 31)"/><circle cx="24" cy="24" r="5" fill="#f5d860"/><circle cx="24" cy="24" r="2.5" fill="#e0a830"/><path d="M24 36v10" stroke="#5a8a4a" stroke-width="2" stroke-linecap="round"/></svg>`,
+  "herb": `<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path d="M24 42v-28" stroke="#5a8a4a" stroke-width="2" stroke-linecap="round"/><path d="M24 16c-6-1-9-6-7-10 5 1 9 5 7 10z" fill="#6aaa5a"/><path d="M24 22c6-1 9-6 7-10-5 1-9 5-7 10z" fill="#7cc06a"/><path d="M24 28c-5-1-8-5-6-9 4 1 8 4 6 9z" fill="#6aaa5a"/><path d="M24 34c4-1 7-4 5-8-3 1-7 4-5 8z" fill="#7cc06a"/></svg>`,
+};
+
+const ICON_KEYS = Object.keys(SVG_ICONS);
+const ICON_LABELS = {
+  "rose-pink":"粉玫瑰","rose-red":"红玫瑰","rose-yellow":"黄玫瑰","rose-purple":"紫玫瑰","rose-white":"白玫瑰",
+  "blueberry":"蓝莓","strawberry":"草莓",
+  "pansy-blue":"蓝三色堇","pansy-white":"白三色堇","pansy-purple":"紫角堇",
+  "leaf":"叶子","sprout":"嫩芽","flower-pink":"小花","herb":"草本"
+};
+
+function iconHTML(key, size) {
+  size = size || 32;
+  if(SVG_ICONS[key]) return `<span style="display:inline-block;width:${size}px;height:${size}px">${SVG_ICONS[key]}</span>`;
+  return `<span style="font-size:${size}px;line-height:1">${key}</span>`;
+}
+
+
+const DEFAULT_TAGS=["月季","ブルーベリー","いちご","ハーブ","花"];
+const DEFAULT_PLANTS=[
+  {id:1,name:"真宙",icon:"rose-pink",tag:"月季",waterDays:3,fertDays:14,lastWater:null,lastFert:null,diary:[],memo:""},
+  {id:2,name:"ジャクリーヌ・デュ・プレ",icon:"rose-white",tag:"月季",waterDays:3,fertDays:14,lastWater:null,lastFert:null,diary:[],memo:""},
+  {id:3,name:"Cooper",icon:"blueberry",tag:"ブルーベリー",waterDays:2,fertDays:21,lastWater:null,lastFert:null,diary:[],memo:""},
+  {id:4,name:"Duplin",icon:"blueberry",tag:"ブルーベリー",waterDays:2,fertDays:21,lastWater:null,lastFert:null,diary:[],memo:""},
+  {id:5,name:"いちご",icon:"strawberry",tag:"いちご",waterDays:1,fertDays:10,lastWater:null,lastFert:null,diary:[],memo:""},
+];
+
+const td=()=>new Date().toISOString().split("T")[0];
+function ago(d){if(!d)return null;return Math.floor((new Date(td())-new Date(d))/864e5)}
+function agoT(d){return d===null?"未记录":d===0?"今天":d+"天前"}
+function dotC(d,i){if(d===null)return"dot-none";if(d>=i)return"dot-alert";if(d>=i-1)return"dot-warn";return"dot-ok"}
+function sHex(d,i){if(d===null)return"#ccc";if(d>=i)return"#e88";if(d>=i-1)return"#edb95e";return"#8cc084"}
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+
+let data={tags:[],plants:[]};
+let view="home",selId=null,filterTag="all",showDiaryForm=false,diaryText="",diaryPhotos=[],showModal=null;
+let addForm={name:"",tag:"",newTag:"",icon:"🌱",waterDays:3,fertDays:14,memo:""};
+let lightboxSrc=null,toastTimer=null;
+let showEdit=false,editName="",editIcon="",editTag="";
+let alertHidden=false;
+
+function load(){try{const s=localStorage.getItem(SK);if(s){const d=JSON.parse(s);if(d&&d.plants)return d;}}catch(e){}return{tags:[...DEFAULT_TAGS],plants:DEFAULT_PLANTS.map(p=>({...p,diary:[]}))};}
+function save(){try{localStorage.setItem(SK,JSON.stringify(data));}catch(e){}}
+function sel(){return data.plants.find(p=>p.id===selId)}
+
+function doWater(id){const p=data.plants.find(x=>x.id===id);if(p){p.lastWater=td();save();toast("浇水完成 💧");render();}}
+function doFert(id){const p=data.plants.find(x=>x.id===id);if(p){p.lastFert=td();save();toast("施肥完成 🌿");render();}}
+
+function doAddDiary(){
+  if(!diaryText.trim()&&diaryPhotos.length===0)return;
+  const p=sel();if(!p)return;
+  p.diary.push({id:Date.now(),date:td(),text:diaryText.trim(),photos:[...diaryPhotos]});
+  diaryText="";diaryPhotos=[];showDiaryForm=false;save();toast("日记已添加 📝");render();
+}
+function doDelDiary(did){const p=sel();if(!p)return;p.diary=p.diary.filter(d=>d.id!==did);save();render();}
+
+function doAddPlant(){
+  if(!addForm.name.trim())return;
+  let tag=addForm.tag;
+  if(addForm.newTag.trim()){tag=addForm.newTag.trim();if(!data.tags.includes(tag))data.tags.push(tag);}
+  if(!tag)tag="其他";
+  data.plants.push({id:Date.now(),name:addForm.name.trim(),icon:addForm.icon,tag,waterDays:Number(addForm.waterDays)||3,fertDays:Number(addForm.fertDays)||14,lastWater:null,lastFert:null,diary:[],memo:addForm.memo.trim()});
+  addForm={name:"",tag:"",newTag:"",icon:"🌱",waterDays:3,fertDays:14,memo:""};view="home";save();toast("新植物已添加 🌱");render();
+}
+function doDelPlant(id){data.plants=data.plants.filter(p=>p.id!==id);view="home";save();toast("已删除");render();}
+function doEditPlant(){
+  const p=sel();if(!p)return;
+  const ni=document.getElementById("editNameI");if(ni)editName=ni.value;
+  if(editName.trim())p.name=editName.trim();
+  if(editIcon)p.icon=editIcon;
+  if(editTag)p.tag=editTag;
+  showEdit=false;save();toast("已更新 ✨");render();
+}
+function doReset(){localStorage.removeItem(SK);data=load();showModal=null;view="home";filterTag="all";toast("已重置");render();}
+
+function doAddTag(){
+  const inp=document.getElementById("newTagInput");
+  if(!inp||!inp.value.trim())return;
+  const t=inp.value.trim();
+  if(!data.tags.includes(t)){data.tags.push(t);save();toast("标签已添加");render();}
+}
+function doDelTag(t){
+  data.tags=data.tags.filter(x=>x!==t);
+  data.plants.forEach(p=>{if(p.tag===t)p.tag="其他";});
+  save();render();
+}
+
+function doExport(){
+  const json=JSON.stringify(data,null,2);
+  const blob=new Blob([json],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  a.download="xiaomian-garden-backup-"+td()+".json";
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast("数据已导出 📦");
+}
+function doImport(file){
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const imported=JSON.parse(e.target.result);
+      if(imported&&imported.plants&&Array.isArray(imported.plants)){
+        data=imported;save();toast("数据已导入 ✨");render();
+      }else{toast("文件格式不对哦");}
+    }catch(err){toast("导入失败，文件有问题");}
+  };
+  reader.readAsText(file);
+}
+
+function nav(v,id){view=v;if(id!==undefined)selId=id;showDiaryForm=false;diaryText="";diaryPhotos=[];showEdit=false;render();}
+function toast(m){if(toastTimer)clearTimeout(toastTimer);const el=document.getElementById("toast");if(el){el.textContent=m;el.className="toast";}toastTimer=setTimeout(()=>{if(el)el.className="toast out";},2000);}
+
+// ========== PHOTO HANDLING ==========
+function handlePhotos(files){
+  const maxW=800;
+  Array.from(files).forEach(f=>{
+    if(!f.type.startsWith("image/"))return;
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const img=new Image();
+      img.onload=()=>{
+        const canvas=document.createElement("canvas");
+        let w=img.width,h=img.height;
+        if(w>maxW){h=h*(maxW/w);w=maxW;}
+        canvas.width=w;canvas.height=h;
+        canvas.getContext("2d").drawImage(img,0,0,w,h);
+        diaryPhotos.push(canvas.toDataURL("image/jpeg",0.7));
+        render();
+      };
+      img.src=e.target.result;
+    };
+    reader.readAsDataURL(f);
+  });
+}
+
+// ========== RENDER ==========
+function render(){
+  const app=document.getElementById("app");
+  if(view==="home")app.innerHTML=rHome();
+  else if(view==="detail")app.innerHTML=rDetail();
+  else if(view==="add")app.innerHTML=rAdd();
+  else if(view==="tags")app.innerHTML=rTags();
+  app.innerHTML+='<div id="toast" class="toast hidden"></div>';
+  if(showModal==="reset")app.innerHTML+=`<div class="modal" data-a="close-modal"><div class="card modal-c tc" onclick="event.stopPropagation()"><div style="font-size:32px" class="mb-8">🔄</div><p style="font-size:14px;color:#4a6741" class="mb-16">确定要重置所有数据吗？</p><div class="flex flex-center gap-10"><button class="btn btn-s" data-a="close-modal">取消</button><button class="btn btn-d" data-a="do-reset">确定</button></div></div></div>`;
+  if(lightboxSrc)app.innerHTML+=`<div class="lightbox" data-a="close-lb"><img src="${lightboxSrc}" class="diary-photo-lg"></div>`;
+  bindAll();
+}
+
+function rHome(){
+  const ds=new Date().toLocaleDateString("zh-CN",{month:"long",day:"numeric",weekday:"long"});
+  const nw=data.plants.filter(p=>{const d=ago(p.lastWater);return d===null||d>=p.waterDays;});
+  const nf=data.plants.filter(p=>{const d=ago(p.lastFert);return d===null||d>=p.fertDays;});
+  const filtered=filterTag==="all"?data.plants:data.plants.filter(p=>p.tag===filterTag);
+  const tags=["all",...[...new Set(data.plants.map(p=>p.tag))]];
+
+  let alert="";
+  if(nw.length||nf.length){
+    if(alertHidden){
+      alert=`<div class="card card-alert" style="padding:10px 18px"><div class="flex" style="justify-content:space-between;align-items:center"><span style="font-size:13px;color:#8a7040;font-weight:600">✨ 今日待办 (${nw.length+nf.length})</span><button class="btn btn-xs btn-s" data-a="toggle-alert">展开</button></div></div>`;
+    } else {
+      alert=`<div class="card card-alert"><div class="flex mb-8" style="justify-content:space-between;align-items:center"><span style="font-size:13px;color:#8a7040;font-weight:600">✨ 今日待办</span><button class="btn btn-xs btn-s" data-a="toggle-alert">收起</button></div>
+      ${nw.length?`<div style="font-size:13px;color:#6a8aaa" class="mb-4">💧 需要浇水：${nw.map(p=>`<span data-a="quick-water" data-id="${p.id}" style="cursor:pointer;text-decoration:underline dotted">${esc(p.name)}</span>`).join("、")}</div>`:""}
+      ${nf.length?`<div style="font-size:13px;color:#9a8050">🌾 需要施肥：${nf.map(p=>`<span data-a="quick-fert" data-id="${p.id}" style="cursor:pointer;text-decoration:underline dotted">${esc(p.name)}</span>`).join("、")}</div>`:""}</div>`;
+    }
+  }
+
+  return `<div class="tc" style="padding:28px 0 14px">
+    <div style="font-size:32px" class="mb-4">🌿</div>
+    <h1 class="title">小眠的花园</h1>
+    <p class="subtitle mt-6">${ds}</p>
+  </div>${alert}
+  <div class="filter-bar mb-8">${tags.map(t=>`<span class="tag ${filterTag===t?'tag-active':'tag-default'}" data-a="filter" data-tag="${esc(t)}">${t==="all"?"全部":esc(t)}</span>`).join("")}</div>
+  <div class="mb-12">
+    <div class="sec mb-10" style="padding-left:4px;color:#8aaa82">我的植物 (${filtered.length})</div>
+    ${filtered.length===0?`<div class="card tc muted" style="padding:24px">这个分类下还没有植物</div>`:
+    filtered.map(p=>{const wd=ago(p.lastWater),fd=ago(p.lastFert);
+      return`<div class="card card-click flex gap-14" style="align-items:center" data-a="detail" data-id="${p.id}">
+      <div style="line-height:1">${iconHTML(p.icon,36)}</div>
+      <div class="f1"><div class="flex gap-8" style="align-items:center"><span class="pname">${esc(p.name)}</span><span class="tag tag-sm tag-default">${esc(p.tag)}</span></div>
+      <div class="flex gap-12 mt-6 info"><span class="flex" style="align-items:center"><span class="dot ${dotC(wd,p.waterDays)}"></span>💧 ${agoT(wd)}</span><span class="flex" style="align-items:center"><span class="dot ${dotC(fd,p.fertDays)}"></span>🌾 ${agoT(fd)}</span></div></div>
+      <div style="color:#ccc;font-size:18px">›</div></div>`;}).join("")}
+  </div>
+  <div class="flex flex-center gap-8 pb-30 wrap">
+    <button class="btn btn-p" data-a="go-add">+ 添加植物</button>
+    <button class="btn btn-s btn-sm" data-a="go-tags">管理标签</button>
+    <button class="btn btn-s btn-sm" data-a="export-data">📦 导出</button>
+    <button class="btn btn-s btn-sm" data-a="import-data">📥 导入</button>
+    <button class="btn btn-s btn-sm" data-a="show-reset">重置</button>
+  </div>
+  <input type="file" id="importInput" accept=".json" style="display:none">`;
+}
+
+function rDetail(){
+  const p=sel();if(!p)return"";
+  const wd=ago(p.lastWater),fd=ago(p.lastFert);
+
+  const diaryForm=showDiaryForm?`<div style="background:#f6faf4;border-radius:12px;padding:14px" class="mb-12">
+    <textarea class="ta" placeholder="记录今天的观察..." id="diaryInput">${esc(diaryText)}</textarea>
+    <div class="photo-upload" id="photoArea">
+      ${diaryPhotos.map((ph,i)=>`<div style="position:relative"><img src="${ph}" class="photo-preview"><button class="photo-remove" data-a="rm-photo" data-idx="${i}">×</button></div>`).join("")}
+      <div class="photo-add" data-a="add-photo">+</div>
+    </div>
+    <div class="tr mt-8"><button class="btn btn-p btn-sm" data-a="save-diary">保存日记</button></div>
+  </div>`:"";
+
+  const diaryList=(!p.diary||p.diary.length===0)?`<p class="muted tc" style="margin:12px 0">还没有日记，开始记录吧 ✿</p>`:
+    [...p.diary].reverse().map(d=>`<div class="diary-entry">
+      <div style="font-size:13px;color:#4a6741;line-height:1.6;white-space:pre-wrap">${esc(d.text)}</div>
+      ${d.photos&&d.photos.length?`<div class="diary-photos">${d.photos.map(ph=>`<img src="${ph}" class="diary-photo" data-a="lightbox" data-src="${ph}">`).join("")}</div>`:""}
+      <div class="flex mt-6" style="justify-content:space-between;align-items:center"><span class="xs">${d.date}</span><button class="btn btn-xs btn-d" data-a="del-diary" data-did="${d.id}">删除</button></div>
+    </div>`).join("");
+
+  return `<div style="padding:16px 0 8px"><button class="btn btn-ghost" data-a="go-home">‹ 返回</button></div>
+  <div class="tc mb-20">
+    <div style="font-size:52px;line-height:1" class="mb-8">${iconHTML(p.icon,56)}</div>
+    <h2 style="font-family:var(--serif);font-size:20px;color:#3a5a32">${esc(p.name)}</h2>
+    <span class="tag tag-sm tag-default mt-6" style="display:inline-flex">${esc(p.tag)}</span>
+    ${p.memo?`<p style="font-size:12px;color:#999;margin-top:8px;line-height:1.5">${esc(p.memo)}</p>`:""}
+  </div>
+  <div class="card mb-12">
+    <div class="flex" style="justify-content:space-between;align-items:flex-start">
+      <div class="sec">📝 备注</div>
+      <button class="btn btn-xs btn-s" data-a="toggle-memo">${p._editMemo?"取消":"编辑"}</button>
+    </div>
+    ${p._editMemo?`<div class="mt-8"><textarea class="ta" id="memoInput" placeholder="品种信息、购买来源、养护要点...">${esc(p.memo||"")}</textarea><div class="tr mt-8"><button class="btn btn-p btn-sm" data-a="save-memo">保存</button></div></div>`
+    :`<p style="font-size:13px;color:#666;margin-top:8px;line-height:1.6;white-space:pre-wrap">${p.memo?esc(p.memo):`<span class="muted">还没有备注，点编辑添加～</span>`}</p>`}
+  </div>
+  <div class="grid-2 mb-16">
+    <div class="card stat-card"><div class="stat-icon">💧</div><div class="label-sm">上次浇水</div>
+      <div class="stat-val" style="color:${sHex(wd,p.waterDays)}">${agoT(wd)}</div>
+      <div class="xs mt-2">每${p.waterDays}天</div>
+      <button class="btn btn-w btn-sm mt-8" data-a="water" data-id="${p.id}">浇水 ✓</button></div>
+    <div class="card stat-card"><div class="stat-icon">🌾</div><div class="label-sm">上次施肥</div>
+      <div class="stat-val" style="color:${sHex(fd,p.fertDays)}">${agoT(fd)}</div>
+      <div class="xs mt-2">每${p.fertDays}天</div>
+      <button class="btn btn-f btn-sm mt-8" data-a="fert" data-id="${p.id}">施肥 ✓</button></div>
+  </div>
+  <div class="card">
+    <div class="flex mb-10" style="justify-content:space-between;align-items:center">
+      <span class="sec">🌱 生长日记 (${p.diary?p.diary.length:0})</span>
+      <button class="btn btn-s btn-sm" data-a="toggle-diary">${showDiaryForm?"取消":"+ 写日记"}</button>
+    </div>
+    ${diaryForm}${diaryList}
+  </div>
+  <div class="card">
+    <div class="sec mb-10">⚙️ 养护设置</div>
+    <div class="grid-2">
+      <div><label class="label label-sm">浇水间隔（天）</label><input type="number" min="1" class="inp mt-4" value="${p.waterDays}" id="wdI"></div>
+      <div><label class="label label-sm">施肥间隔（天）</label><input type="number" min="1" class="inp mt-4" value="${p.fertDays}" id="fdI"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="flex mb-10" style="justify-content:space-between;align-items:center">
+      <span class="sec">✏️ 编辑植物</span>
+      <button class="btn btn-s btn-sm" data-a="toggle-edit">${showEdit?"取消":"修改"}</button>
+    </div>
+    ${showEdit?`<div>
+      <div class="mb-12"><label class="label">名称</label><input class="inp" value="${esc(p.name)}" id="editNameI"></div>
+      <div class="mb-12"><label class="label mb-6">图标</label><div class="flex gap-4 wrap" style="max-height:120px;overflow-y:auto">${ICON_KEYS.map(ic=>`<button class="btn btn-icon ${(editIcon||p.icon)===ic?'active':''}" data-a="edit-icon" data-icon="${ic}" style="padding:4px 6px">${iconHTML(ic,24)}</button>`).join("")}</div></div>
+      <div class="mb-12"><label class="label mb-6">分类</label><div class="flex gap-6 wrap">${data.tags.map(t=>`<span class="tag ${(editTag||p.tag)===t?'tag-active':'tag-default'}" data-a="edit-tag" data-tag="${esc(t)}">${esc(t)}</span>`).join("")}</div></div>
+      <button class="btn btn-p btn-block" data-a="save-edit">保存修改</button>
+    </div>`:``}
+  </div>
+  <div class="tc pb-30" style="padding-top:8px"><button class="btn btn-d btn-sm" data-a="del-plant" data-id="${p.id}">删除此植物</button></div>`;
+}
+
+function rAdd(){
+  const tagOpts=data.tags.map(t=>`<span class="tag ${addForm.tag===t?'tag-active':'tag-default'}" data-a="pick-tag" data-tag="${esc(t)}">${esc(t)}</span>`).join("");
+  const icons=ICON_KEYS.map(ic=>`<button class="btn btn-icon ${addForm.icon===ic?'active':''}" data-a="set-icon" data-icon="${ic}" title="${ICON_LABELS[ic]||ic}" style="padding:4px 6px">${iconHTML(ic,26)}</button>`).join("");
+  return `<div style="padding:16px 0 8px"><button class="btn btn-ghost" data-a="go-home">‹ 返回</button></div>
+  <div class="tc mb-20"><div class="mb-4">${iconHTML(addForm.icon,44)}</div><h2 style="font-family:var(--serif);font-size:18px;color:#3a5a32">添加新植物</h2></div>
+  <div class="card">
+    <div class="mb-14"><label class="label mb-6">图标</label><div class="flex gap-6 wrap">${icons}</div></div>
+    <div class="mb-12"><label class="label">名称 *</label><input class="inp" placeholder="给它起个名字" id="addName" value="${esc(addForm.name)}"></div>
+    <div class="mb-12"><label class="label mb-6">分类标签</label>
+      <div class="flex gap-6 wrap mb-8">${tagOpts}</div>
+      <div class="flex gap-8"><input class="inp" placeholder="或输入新标签..." id="addNewTag" value="${esc(addForm.newTag)}" style="flex:1"><button class="btn btn-s btn-sm" data-a="use-new-tag">使用</button></div>
+    </div>
+    <div class="grid-2 mb-12">
+      <div><label class="label">浇水间隔（天）</label><input type="number" min="1" class="inp" id="addWD" value="${addForm.waterDays}"></div>
+      <div><label class="label">施肥间隔（天）</label><input type="number" min="1" class="inp" id="addFD" value="${addForm.fertDays}"></div>
+    </div>
+    <div class="mb-16"><label class="label">备注（选填）</label><textarea class="ta mt-4" placeholder="品种信息、购买来源、养护要点..." id="addMemo">${esc(addForm.memo)}</textarea></div>
+    <button class="btn btn-p btn-block" data-a="do-add">添加到花园 🌿</button>
+  </div>`;
+}
+
+function rTags(){
+  return `<div style="padding:16px 0 8px"><button class="btn btn-ghost" data-a="go-home">‹ 返回</button></div>
+  <div class="tc mb-20"><h2 style="font-family:var(--serif);font-size:18px;color:#3a5a32">管理标签</h2></div>
+  <div class="card">
+    ${data.tags.map(t=>{const cnt=data.plants.filter(p=>p.tag===t).length;
+      return`<div class="flex mb-8" style="justify-content:space-between;align-items:center">
+        <div><span class="tag tag-default">${esc(t)}</span><span class="xs" style="margin-left:8px">${cnt}株</span></div>
+        <button class="btn btn-xs btn-d" data-a="del-tag" data-tag="${esc(t)}">删除</button>
+      </div>`;}).join("")}
+    <div class="flex gap-8 mt-12"><input class="inp" placeholder="添加新标签..." id="newTagInput" style="flex:1"><button class="btn btn-p btn-sm" data-a="add-tag">添加</button></div>
+  </div>`;
+}
+
+// ========== EVENTS ==========
+function bindAll(){
+  document.querySelectorAll("[data-a]").forEach(el=>{
+    const a=el.dataset.a;
+    if(a==="detail")el.onclick=()=>nav("detail",+el.dataset.id);
+    else if(a==="go-home")el.onclick=()=>nav("home");
+    else if(a==="go-add")el.onclick=()=>nav("add");
+    else if(a==="go-tags")el.onclick=()=>nav("tags");
+    else if(a==="filter"){el.onclick=()=>{filterTag=el.dataset.tag;render();};}
+    else if(a==="water")el.onclick=e=>{e.stopPropagation();doWater(+el.dataset.id);};
+    else if(a==="fert")el.onclick=e=>{e.stopPropagation();doFert(+el.dataset.id);};
+    else if(a==="toggle-diary")el.onclick=()=>{showDiaryForm=!showDiaryForm;render();};
+    else if(a==="save-diary")el.onclick=()=>{const i=document.getElementById("diaryInput");if(i)diaryText=i.value;doAddDiary();};
+    else if(a==="del-diary")el.onclick=()=>doDelDiary(+el.dataset.did);
+    else if(a==="add-photo")el.onclick=()=>document.getElementById("photoInput").click();
+    else if(a==="rm-photo")el.onclick=()=>{diaryPhotos.splice(+el.dataset.idx,1);render();};
+    else if(a==="lightbox")el.onclick=()=>{lightboxSrc=el.dataset.src;render();};
+    else if(a==="close-lb")el.onclick=()=>{lightboxSrc=null;render();};
+    else if(a==="del-plant")el.onclick=()=>doDelPlant(+el.dataset.id);
+    else if(a==="toggle-edit")el.onclick=()=>{const p=sel();if(p){showEdit=!showEdit;editName=p.name;editIcon=p.icon;editTag=p.tag;}render();};
+    else if(a==="edit-icon")el.onclick=()=>{editIcon=el.dataset.icon;render();};
+    else if(a==="edit-tag")el.onclick=()=>{editTag=el.dataset.tag;render();};
+    else if(a==="save-edit")el.onclick=()=>doEditPlant();
+    else if(a==="toggle-alert")el.onclick=()=>{alertHidden=!alertHidden;render();};
+    else if(a==="quick-water")el.onclick=e=>{e.stopPropagation();doWater(+el.dataset.id);};
+    else if(a==="quick-fert")el.onclick=e=>{e.stopPropagation();doFert(+el.dataset.id);};
+    else if(a==="toggle-memo")el.onclick=()=>{const p=sel();if(p){p._editMemo=!p._editMemo;render();}};
+    else if(a==="save-memo")el.onclick=()=>{const p=sel();if(p){const i=document.getElementById("memoInput");if(i)p.memo=i.value.trim();p._editMemo=false;save();toast("备注已保存");render();}};
+    else if(a==="set-icon")el.onclick=()=>{addForm.icon=el.dataset.icon;render();};
+    else if(a==="pick-tag")el.onclick=()=>{addForm.tag=el.dataset.tag;addForm.newTag="";render();};
+    else if(a==="use-new-tag")el.onclick=()=>{const i=document.getElementById("addNewTag");if(i&&i.value.trim()){addForm.newTag=i.value.trim();addForm.tag="";render();}};
+    else if(a==="do-add")el.onclick=()=>{
+      const n=document.getElementById("addName"),t=document.getElementById("addNewTag"),w=document.getElementById("addWD"),f=document.getElementById("addFD"),m=document.getElementById("addMemo");
+      if(n)addForm.name=n.value;if(t)addForm.newTag=t.value;if(w)addForm.waterDays=w.value;if(f)addForm.fertDays=f.value;if(m)addForm.memo=m.value;doAddPlant();
+    };
+    else if(a==="add-tag")el.onclick=()=>doAddTag();
+    else if(a==="del-tag")el.onclick=()=>doDelTag(el.dataset.tag);
+    else if(a==="show-reset")el.onclick=()=>{showModal="reset";render();};
+    else if(a==="export-data")el.onclick=()=>doExport();
+    else if(a==="import-data")el.onclick=()=>document.getElementById("importInput").click();
+    else if(a==="close-modal")el.onclick=()=>{showModal=null;render();};
+    else if(a==="do-reset")el.onclick=()=>doReset();
+  });
+  const wi=document.getElementById("wdI"),fi=document.getElementById("fdI");
+  if(wi)wi.onchange=()=>{const p=sel();if(p){p.waterDays=Math.max(1,+wi.value);save();render();}};
+  if(fi)fi.onchange=()=>{const p=sel();if(p){p.fertDays=Math.max(1,+fi.value);save();render();}};
+  document.getElementById("photoInput").onchange=e=>{if(e.target.files.length)handlePhotos(e.target.files);e.target.value="";};
+  const ii=document.getElementById("importInput");
+  if(ii)ii.onchange=e=>{if(e.target.files.length)doImport(e.target.files[0]);e.target.value="";};
+}
+
+// ========== INIT ==========
+data=load();
+setupPWA();
+render();
+</script>
+</body>
+</html>
